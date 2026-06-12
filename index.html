@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Louer ou acheter ? Faites le calcul. — GAYA</title>
+<meta name="description" content="En quelques questions, découvrez à partir de quand acheter un vélo cargo électrique GAYA devient plus rentable que la location." />
+
+<!-- Typographies GAYA : DM Serif Display (accroches) + Nunito Sans (substitut Avenir pour le corps) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800&display=swap" rel="stylesheet">
+
+<!-- (Optionnel) Snippet Onsite Klaviyo — décommentez et remplacez COMPANY_ID si vous l'utilisez en plus de l'API client.
+<script async src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=COMPANY_ID"></script> -->
+
+<style>
+/* =========================================================================
+   CHARTE GAYA — variables faciles à remplacer
+   ========================================================================= */
+:root {
+  --gaya-night:   #2D3944;
+  --gaya-sun:     #FFD066;
+  --gaya-cream:   #EFE9DA;
+  --gaya-ocre:    #E5B376;
+  --gaya-orange:  #F78152;
+  --gaya-bleu-nuit:#0D4666;
+  --gaya-bleu:    #4399D4;
+  --gaya-teal:    #1E898E;
+  --gaya-mint:    #53C4C1;
+  --gaya-vert:    #3FCE9B;
+  --gaya-rose:    #FF809D;
+  --gaya-rouge:   #ED4C5C;
+  --white:        #FFFFFF;
+
+  --bg:           var(--gaya-cream);
+  --ink:          var(--gaya-night);
+  --primary:      var(--gaya-teal);
+  --rent-color:   var(--gaya-orange);
+  --accent:       var(--gaya-sun);
+
+  --radius:   22px;
+  --radius-s: 14px;
+  --shadow:  0 18px 40px -22px rgba(45,57,68,.45);
+  --shadow-s:0 8px 22px -14px rgba(45,57,68,.4);
+  --maxw: 720px;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: "Nunito Sans", "Avenir Next", Avenir, "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+.serif { font-family: "DM Serif Display", Georgia, "Times New Roman", serif; font-weight: 400; }
+h1, h2, h3 { line-height: 1.14; margin: 0 0 .35em; }
+p { margin: 0 0 1em; }
+a { color: inherit; }
+small { font-size: .8rem; }
+
+/* ============================== Topbar ============================== */
+.topbar {
+  background: var(--gaya-night); color: var(--white);
+  text-align: center; padding: 16px;
+  position: sticky; top: 0; z-index: 20;
+}
+.logo {
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+}
+.logo-img { height: 34px; width: auto; display: block; }
+.logo-wordmark {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 1.5rem; letter-spacing: .14em; color: var(--white);
+  align-items: center;
+}
+.logo .dot { color: var(--gaya-sun); }
+
+/* ============================== Wizard ============================== */
+.wizard { width: 100%; max-width: var(--maxw); margin-inline: auto; padding: 22px 18px 64px; }
+
+/* Barre de progression */
+.progress { margin: 6px 0 22px; }
+.progress-track { height: 8px; background: #e3ddcd; border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; width: 25%; background: var(--gaya-teal); border-radius: 99px; transition: width .4s cubic-bezier(.22,1,.36,1); }
+.progress-label { margin-top: 8px; font-size: .78rem; font-weight: 800; letter-spacing: .04em; color: var(--gaya-teal); text-transform: uppercase; }
+.progress-label .muted { color: #9aa3ab; }
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(22px, 4.5vw, 36px);
+}
+.eyebrow {
+  text-transform: uppercase; letter-spacing: .16em; font-weight: 800;
+  font-size: .72rem; color: var(--gaya-teal); margin-bottom: .55em;
+}
+
+/* Étapes : une seule visible à la fois */
+.step { display: none; }
+.step.active { display: block; animation: slideIn .38s cubic-bezier(.22,1,.36,1); }
+@keyframes slideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.step h2 { font-size: clamp(1.5rem, 5.5vw, 2.1rem); }
+.step .hint { color: #5d6973; font-size: .95rem; margin-top: -.2em; }
+
+/* ---- Slider durée ---- */
+.duration-value { text-align: center; font-family: "DM Serif Display", Georgia, serif; font-size: clamp(3rem, 14vw, 4.6rem); color: var(--gaya-night); line-height: 1; margin: 14px 0 .1em; }
+.duration-value span { font-size: .32em; font-family: "Nunito Sans",sans-serif; font-weight: 700; color: var(--gaya-teal); letter-spacing: .04em; }
+.dur-edit { margin-top: 14px; text-align: center; font-size: .88rem; color: #7c8893; font-weight: 700; }
+.dur-edit .num-input { width: 78px; }
+
+/* ---- Sliders / inputs ---- */
+.range-row { margin: 22px 0; }
+.range-row .lbl { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.range-row .lbl .name { font-weight: 700; font-size: 1rem; }
+.num-input {
+  font-family: inherit; font-weight: 800; font-size: 1rem; color: var(--gaya-night);
+  width: 92px; text-align: right; border: 2px solid #e3ddcd; border-radius: 10px;
+  padding: 6px 9px; background: #fbf9f4;
+}
+.num-input:focus { outline: none; border-color: var(--gaya-teal); }
+.num-suffix { font-weight: 700; color: #7c8893; font-size: .85rem; margin-left: 4px; }
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
+  border-radius: 99px; background: #e6e0d0; outline: none; margin: 6px 0 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--white); border: 4px solid var(--thumb, var(--gaya-teal));
+  box-shadow: var(--shadow-s); cursor: pointer; transition: transform .1s;
+}
+input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.12); }
+input[type="range"]::-moz-range-thumb {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--white);
+  border: 4px solid var(--thumb, var(--gaya-teal)); box-shadow: var(--shadow-s); cursor: pointer;
+}
+input[type="range"]:focus-visible { box-shadow: 0 0 0 4px rgba(30,137,142,.25); }
+.scale { display: flex; justify-content: space-between; color: #7c8893; font-size: .78rem; margin-top: 6px; }
+
+.step.rent { --thumb: var(--gaya-orange); }
+.step.buy  { --thumb: var(--gaya-teal); }
+.param-total { font-weight: 800; margin-top: 18px; font-size: 1rem; padding: 14px 16px; border-radius: var(--radius-s); }
+.step.rent .param-total { background: #fff3ec; }
+.step.buy  .param-total { background: #e9f6f6; }
+.param-total b { font-size: 1.15rem; }
+.aid-badge { display: inline-block; background: var(--gaya-vert); color: #fff; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 99px; vertical-align: middle; margin-left: 4px; }
+.range-row.is-off { opacity: .38; pointer-events: none; filter: grayscale(.4); transition: opacity .15s; }
+.method-note { display: block; margin-top: 6px; font-size: .76rem; color: #7c8893; font-weight: 600; line-height: 1.4; }
+
+/* ---- Toggles ---- */
+.toggle-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 13px 15px; background: #f4f0e6; border-radius: var(--radius-s); }
+.toggle-row .txt { flex: 1; font-size: .9rem; }
+.toggle-row .txt b { display: block; }
+.toggle-row .est { color: var(--gaya-orange); font-weight: 800; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+.switch { position: relative; width: 52px; height: 30px; flex: none; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .track { position: absolute; inset: 0; background: #cfc8b6; border-radius: 99px; transition: .2s; cursor: pointer; }
+.switch .track::before { content:""; position: absolute; height: 24px; width: 24px; left: 3px; top: 3px; background: var(--white); border-radius: 50%; transition: .2s; box-shadow: var(--shadow-s); }
+.switch input:checked + .track { background: var(--gaya-teal); }
+.switch input:checked + .track::before { transform: translateX(22px); }
+
+/* ---- Navigation ---- */
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px; }
+.nav.end { justify-content: flex-end; }
+.btn {
+  font-family: inherit; font-weight: 800; font-size: 1.02rem; border-radius: 99px; cursor: pointer;
+  padding: 14px 26px; border: none; transition: transform .12s, background .15s;
+}
+.btn:active { transform: scale(.98); }
+.btn-next { background: var(--gaya-night); color: var(--white); }
+.btn-next:hover { background: #1f2933; }
+.btn-back { background: none; border: 2px solid #d8d1c0; color: var(--gaya-night); }
+.btn-back:hover { background: #f0ece0; }
+.link-reset { background: none; border: none; color: #9aa3ab; font-family: inherit; font-weight: 700; font-size: .85rem; cursor: pointer; text-decoration: underline; padding: 0; }
+
+/* ============================== Résultat ============================== */
+.result-shell { position: relative; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(22px, 4.5vw, 32px); overflow: hidden; }
+.result-content { transition: filter .4s; }
+.result-content.locked { filter: blur(6px); pointer-events: none; user-select: none; }
+
+.verdict { text-align: center; }
+.verdict .pill { display: inline-block; padding: 7px 16px; border-radius: 99px; font-weight: 800; font-size: .85rem; margin-bottom: 14px; }
+.verdict.win .pill  { background: #e3f7ee; color: #1f8a5e; }
+.verdict.wait .pill { background: #fff1d9; color: #a9761a; }
+.verdict.err .pill  { background: #fde3e6; color: var(--gaya-rouge); }
+.big-number { font-family: "DM Serif Display", Georgia, serif; font-size: clamp(3rem, 16vw, 5.6rem); line-height: 1; color: var(--gaya-teal); margin: .05em 0; }
+.verdict.wait .big-number { color: var(--gaya-orange); }
+.big-caption { font-size: 1.05rem; max-width: 30ch; margin: .2em auto 0; }
+.big-caption b { color: var(--gaya-night); }
+.subline { font-size: .92rem; color: #5d6973; margin-top: 12px; }
+
+.block-title { font-size: 1.25rem; margin: 34px 0 4px; }
+.block-eyebrow { text-transform: uppercase; letter-spacing: .14em; font-weight: 800; font-size: .7rem; color: var(--gaya-teal); }
+
+/* Graphique */
+.chart-wrap { position: relative; width: 100%; }
+svg.chart { width: 100%; height: auto; display: block; min-height: 280px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 10px; font-size: .85rem; font-weight: 700; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 16px; height: 5px; border-radius: 99px; display: inline-block; }
+.legend i.dash { background: repeating-linear-gradient(90deg,var(--gaya-night) 0 4px, transparent 4px 7px); height: 2px; }
+
+/* Tableau */
+table.detail { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .92rem; }
+table.detail th, table.detail td { padding: 12px 8px; text-align: right; }
+table.detail th:first-child, table.detail td:first-child { text-align: left; }
+table.detail thead th { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: #7c8893; border-bottom: 2px solid #ece6d8; }
+table.detail tbody td { border-bottom: 1px solid #f0ebde; }
+table.detail .diff-pos { color: #1f8a5e; font-weight: 800; }
+table.detail .diff-neg { color: var(--gaya-orange); font-weight: 800; }
+table.detail tfoot td { font-weight: 700; font-size: .95rem; }
+table.detail tfoot tr:first-child td { border-top: 2px solid #ece6d8; }
+table.detail .colrent { color: var(--gaya-orange); font-weight: 700; }
+table.detail .colbuy  { color: var(--gaya-teal); font-weight: 700; }
+table.detail tfoot tr.grand td { font-weight: 800; font-size: 1.18rem; padding-top: 14px; }
+table.detail tfoot tr.grand td.save-pos { color: #1f8a5e; }
+table.detail tfoot tr.grand td.save-neg { color: var(--gaya-orange); }
+
+/* Équivalents */
+.equiv-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-top: 10px; }
+@media (min-width: 560px) { .equiv-grid { grid-template-columns: repeat(4,1fr); } }
+.equiv { background: #faf7f0; border-radius: var(--radius-s); padding: 16px 10px; text-align: center; }
+.equiv .emoji { font-size: 1.9rem; line-height: 1; }
+.equiv .qty { font-family: "DM Serif Display", Georgia, serif; font-size: 1.7rem; color: var(--gaya-night); margin: 4px 0 0; }
+.equiv .what { font-size: .8rem; color: #5d6973; }
+
+/* CTA */
+.cta-final { margin-top: 30px; background: var(--gaya-night); color: var(--white); border-radius: var(--radius); padding: 28px; text-align: center; }
+.cta-final h3 { color: var(--white); font-size: 1.5rem; }
+.cta-final h3 em { color: var(--gaya-sun); font-style: italic; }
+.cta-final p { opacity: .9; margin-inline: auto; max-width: 36ch; }
+.cta-btn { display: inline-block; margin-top: 12px; background: var(--gaya-sun); color: var(--gaya-night); font-weight: 800; font-size: 1.08rem; text-decoration: none; padding: 15px 32px; border-radius: 99px; box-shadow: 0 14px 30px -14px rgba(255,208,102,.9); transition: transform .12s; }
+.cta-btn:hover { transform: translateY(-2px); }
+.result-restart { text-align: center; margin-top: 22px; }
+
+/* ============================== Email overlay ============================== */
+.email-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(45,57,68,.55); backdrop-filter: blur(2px);
+  display: grid; place-items: center; padding: 18px;
+  animation: fadeIn .3s ease;
+}
+.email-overlay.hidden { display: none; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.email-card {
+  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: clamp(24px, 5vw, 38px); max-width: 420px; width: 100%; text-align: center;
+  animation: slideIn .4s cubic-bezier(.22,1,.36,1);
+}
+.email-card .teaser-label { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #9aa3ab; }
+.email-card .teaser { font-family: "DM Serif Display",serif; font-size: 2.8rem; color: var(--gaya-teal); line-height: 1; margin-top: 2px; }
+.email-card .teaser .blurmoney { filter: blur(5px); }
+.email-card h3 { font-size: 1.4rem; margin-top: 10px; }
+.email-card p { font-size: .92rem; color: #5d6973; }
+.email-card input[type="email"] {
+  width: 100%; font-family: inherit; font-size: 1rem; padding: 14px 16px; margin-top: 6px;
+  border: 2px solid #e3ddcd; border-radius: 12px; background: #fbf9f4; text-align: center;
+}
+.email-card input[type="email"]:focus { outline: none; border-color: var(--gaya-teal); }
+.email-card .btn-next { width: 100%; margin-top: 12px; }
+.email-card .btn-next[disabled] { opacity: .6; cursor: wait; }
+.email-err { color: var(--gaya-rouge); font-size: .82rem; font-weight: 700; min-height: 1.1em; margin-top: 8px; }
+.email-consent { font-size: .72rem; color: #9aa3ab; margin-top: 12px; line-height: 1.4; }
+.email-skip { display: inline-block; margin-top: 10px; background: none; border: none; padding: 4px;
+  color: #b4ad9e; font-family: inherit; font-size: .76rem; text-decoration: underline; cursor: pointer; transition: color .15s; }
+.email-skip:hover { color: #7c8893; }
+
+/* ============================== Footer ============================== */
+footer.legal { padding: 10px 18px 50px; text-align: center; max-width: var(--maxw); margin-inline: auto; }
+footer.legal p { font-size: .76rem; color: #8b8576; }
+
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+@media (max-width: 420px) {
+  .wizard { padding: 18px 12px 50px; }
+  .card { padding: 22px 16px; }
+  .btn { padding: 13px 18px; font-size: .96rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="https://gaya.bike" aria-label="GAYA, accueil">
+    <!-- Déposez votre logo nommé "logo.svg" (ou .png) à côté de index.html.
+         S'il est absent, on retombe automatiquement sur le mot-clé GAYA. -->
+    <img src="data:image/png;base64,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" alt="GAYA" class="logo-img"
+         onerror="if(!this.dataset.f){this.dataset.f=1;this.src='logo.png';}else{this.style.display='none';document.getElementById('logoWordmark').style.display='inline-flex';}">
+    <span id="logoWordmark" class="logo-wordmark" style="display:none">GAYA<span class="dot">.</span></span>
+  </a>
+</header>
+
+<main class="wizard">
+
+  <!-- Barre de progression -->
+  <div class="progress">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label"><span id="stepLabel">Étape 1 / 4</span> <span class="muted">·</span> <span id="stepName">Durée</span></div>
+  </div>
+
+  <!-- ================= ÉTAPE 1 — DURÉE ================= -->
+  <section class="step active card" data-step="1" aria-labelledby="s1-title">
+    <div class="eyebrow">Louer ou acheter ? Faites le calcul.</div>
+    <h2 id="s1-title" class="serif">Pendant combien de temps allez-vous rouler ?</h2>
+    <p class="hint">Plus vous roulez longtemps, plus l'achat devient intéressant. Faites glisser pour choisir.</p>
+
+    <div class="duration-value"><span id="durMonthsBig">36</span> <span>mois</span></div>
+    <input type="range" id="months" min="1" max="60" step="1" value="36"
+           aria-label="Durée d'utilisation en mois" aria-valuemin="1" aria-valuemax="60" aria-valuenow="36">
+    <div class="scale"><span>1 mois</span><span id="durYears">soit 3 ans</span><span>60 mois</span></div>
+    <div class="dur-edit">ou saisissez :
+      <input class="num-input" type="number" id="months_n" min="1" max="60" step="1" value="36" aria-label="Durée en mois (saisie directe)">
+      <span class="num-suffix">mois</span>
+    </div>
+
+    <div class="nav end">
+      <button class="btn btn-next" data-next>Commencer →</button>
+    </div>
+  </section>
+
+  <!-- ================= ÉTAPE 2 — LOCATION ================= -->
+  <section class="step rent card" data-step="2" aria-labelledby="s2-title">
+    <div class="eyebrow">Votre location aujourd'hui</div>
+    <h2 id="s2-title" class="serif">Combien vous coûte la location&nbsp;?</h2>
+    <p class="hint">Indiquez ce que vous payez (ou paieriez) chaque mois pour louer un vélo.</p>
+
+    <div class="range-row">
+      <div class="lbl"><span class="name">Loyer mensuel</span>
+        <span><input class="num-input" type="number" id="rentMonthly_n" min="40" max="150" step="1" value="79" aria-label="Loyer mensuel en euros"><span class="num-suffix">€/mois</span></span></div>
+      <input type="range" id="rentMonthly" min="40" max="150" step="1" value="79" aria-label="Loyer mensuel" aria-valuemin="40" aria-valuemax="150" aria-valuenow="79">
+    </div>
+    <div class="range-row">
+      <div class="lbl"><span class="name">Assurance</span>
+        <span><input class="num-input" type="number" id="rentIns_n" min="0" max="20" step="1" value="5" aria-label="Assurance location en euros par mois"><span class="num-suffix">€/mois</span></span></div>
+      <input type="range" id="rentIns" min="0" max="20" step="1" value="5" aria-label="Assurance location" aria-valuemin="0" aria-valuemax="20" aria-valuenow="5">
+    </div>
+    <div class="range-row">
+      <div class="lbl"><span class="name">Accessoires</span>
+        <span><input class="num-input" type="number" id="rentAcc_n" min="0" max="40" step="1" value="5" aria-label="Accessoires location en euros par mois"><span class="num-suffix">€/mois</span></span></div>
+      <input type="range" id="rentAcc" min="0" max="40" step="1" value="5" aria-label="Accessoires location" aria-valuemin="0" aria-valuemax="40" aria-valuenow="5">
+    </div>
+
+    <div class="param-total">Coût location : <b id="rentPerMonth">89 €</b> / mois</div>
+
+    <div class="nav">
+      <button class="btn btn-back" data-back>← Retour</button>
+      <button class="btn btn-next" data-next>Suivant →</button>
+    </div>
+  </section>
+
+  <!-- ================= ÉTAPE 3 — GAYA ================= -->
+  <section class="step buy card" data-step="3" aria-labelledby="s3-title">
+    <div class="eyebrow">Acheter un GAYA</div>
+    <h2 id="s3-title" class="serif">Et si vous l'achetiez&nbsp;?</h2>
+    <p class="hint">Un achat au départ, puis presque rien chaque mois.</p>
+
+    <div class="range-row">
+      <div class="lbl"><span class="name">Prix d'achat</span>
+        <span><input class="num-input" type="number" id="buyPrice_n" min="1800" max="4500" step="50" value="2300" aria-label="Prix d'achat du GAYA en euros"><span class="num-suffix">€</span></span></div>
+      <input type="range" id="buyPrice" min="1800" max="4500" step="50" value="2300" aria-label="Prix d'achat GAYA" aria-valuemin="1800" aria-valuemax="4500" aria-valuenow="2300">
+    </div>
+    <div class="range-row">
+      <div class="lbl"><span class="name">Assurance</span>
+        <span><input class="num-input" type="number" id="buyIns_n" min="0" max="300" step="5" value="90" aria-label="Assurance GAYA en euros par an"><span class="num-suffix">€/an</span></span></div>
+      <input type="range" id="buyIns" min="0" max="300" step="5" value="90" aria-label="Assurance GAYA par an" aria-valuemin="0" aria-valuemax="300" aria-valuenow="90">
+    </div>
+    <div class="range-row">
+      <div class="lbl"><span class="name">Entretien</span>
+        <span><input class="num-input" type="number" id="buyMaint_n" min="0" max="400" step="10" value="120" aria-label="Entretien GAYA en euros par an"><span class="num-suffix">€/an</span></span></div>
+      <input type="range" id="buyMaint" min="0" max="400" step="10" value="120" aria-label="Entretien GAYA par an" aria-valuemin="0" aria-valuemax="400" aria-valuenow="120">
+    </div>
+
+    <!-- Aides au financement (désactivable) -->
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="aidOn" checked aria-label="Activer les aides au financement"><span class="track"></span></label>
+      <div class="txt"><b>Aides au financement <span class="aid-badge">prime vélo</span></b>Prime locale / employeur, déduite de l'achat.</div>
+    </div>
+    <div class="range-row" id="aidRow">
+      <div class="lbl"><span class="name">Montant des aides</span>
+        <span><input class="num-input" type="number" id="buyAid_n" min="0" max="1500" step="50" value="600" aria-label="Aides au financement en euros"><span class="num-suffix">€</span></span></div>
+      <input type="range" id="buyAid" min="0" max="1500" step="50" value="600" aria-label="Aides au financement" aria-valuemin="0" aria-valuemax="1500" aria-valuenow="600">
+    </div>
+
+    <!-- Revente / Seconde Vie -->
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="resale" aria-label="Inclure la valeur de revente GAYA"><span class="track"></span></label>
+      <div class="txt"><b>Inclure la valeur de revente <span class="est">estimation</span></b>
+        Un GAYA garde de la valeur (Seconde Vie). Une location ne laisse aucun bien.
+        <small class="method-note">Méthode : ~55 % du prix au départ, puis −0,75 pt/mois (plancher 15 %). Soit ~28 % à 3 ans.</small></div>
+    </div>
+
+    <div class="param-total">Prix net après aides : <b id="buyNetPrice">1 700 €</b><br>
+      <small style="color:#7c8893;font-weight:600">Frais récurrents : <span id="buyPerMonth">18 €</span> / mois (hors achat)</small></div>
+
+    <div class="nav">
+      <button class="btn btn-back" data-back>← Retour</button>
+      <button class="btn btn-next" data-next>Voir mon résultat →</button>
+    </div>
+  </section>
+
+  <!-- ================= ÉTAPE 4 — RÉSULTAT (verrouillé par email) ================= -->
+  <section class="step" data-step="4" aria-labelledby="s4-title">
+    <div class="result-shell">
+      <div class="result-content locked" id="resultContent">
+
+        <!-- Verdict + grand chiffre -->
+        <div class="verdict win" id="verdict" aria-live="polite">
+          <span class="pill" id="verdictPill">GAYA est gagnant 🎉</span>
+          <h2 id="s4-title" class="sr-only">Résultat</h2>
+          <div class="big-number" id="bigNumber">0 €</div>
+          <p class="big-caption" id="bigCaption">économisés en choisissant GAYA</p>
+          <p class="subline" id="subline"></p>
+        </div>
+
+        <!-- Graphique -->
+        <div class="block-eyebrow" style="margin-top:34px">Coût cumulé dans le temps</div>
+        <h3 class="block-title serif">Le moment où les courbes se croisent</h3>
+        <div class="chart-wrap">
+          <svg class="chart" id="chart" viewBox="0 0 720 430" role="img"
+               aria-label="Graphique comparant le coût cumulé de la location et de l'achat d'un GAYA dans le temps."></svg>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--gaya-orange)"></i> Location (cumulé)</span>
+          <span><i style="background:var(--gaya-teal)"></i> GAYA (cumulé)</span>
+          <span><i class="dash"></i> Aujourd'hui</span>
+          <span><i style="background:var(--gaya-vert)"></i> Économies après bascule</span>
+        </div>
+
+        <!-- Tableau -->
+        <div class="block-eyebrow" style="margin-top:34px">Le détail, sans rien cacher</div>
+        <h3 class="block-title serif">Ce que vous payez sur <span id="tblMonths">36</span> mois</h3>
+        <table class="detail">
+          <thead><tr><th>Poste</th><th>Différence</th></tr></thead>
+          <tbody id="tblBody"></tbody>
+          <tfoot>
+            <tr><td>Total location</td><td class="colrent" id="tblTotRent">—</td></tr>
+            <tr><td>Total GAYA</td><td class="colbuy" id="tblTotBuy">—</td></tr>
+            <tr class="grand"><td>Votre économie</td><td id="tblTotSave">—</td></tr>
+          </tfoot>
+        </table>
+
+        <!-- Équivalents -->
+        <div id="equivSection">
+          <div class="block-eyebrow" style="margin-top:34px">Concrètement</div>
+          <h3 class="block-title serif">C'est aussi l'équivalent de…</h3>
+          <div class="equiv-grid">
+            <div class="equiv"><div class="emoji">☕️</div><div class="qty" id="eqCoffee">0</div><div class="what">cafés en terrasse</div></div>
+            <div class="equiv"><div class="emoji">🍝</div><div class="qty" id="eqDinner">0</div><div class="what">dîners au resto</div></div>
+            <div class="equiv"><div class="emoji">🎬</div><div class="qty" id="eqCinema">0</div><div class="what">sorties ciné en famille</div></div>
+            <div class="equiv"><div class="emoji">🛒</div><div class="qty" id="eqGrocery">0</div><div class="what">pleins de courses</div></div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-final">
+          <h3 class="serif">Et si vous l'essayiez <em>pour de vrai</em> ?</h3>
+          <p>Le meilleur calcul, c'est celui qu'on fait en roulant. Réservez un essai, sans engagement.</p>
+          <a class="cta-btn" id="ctaBtn"
+             href="https://gaya.bike/reserver-un-essai?utm_source=calculateur-location&utm_medium=landing-page&utm_campaign=achat-vs-location">
+             Essayer un GAYA →
+          </a>
+        </div>
+      </div><!-- /result-content -->
+    </div>
+
+    <div class="result-restart">
+      <button class="link-reset" data-restart>↺ Recommencer le calcul</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============== EMAIL OVERLAY (gate du résultat) ============== -->
+<div class="email-overlay hidden" id="emailOverlay" role="dialog" aria-modal="true" aria-labelledby="emailTitle">
+  <div class="email-card">
+    <div class="teaser-label">Vous économisez environ</div>
+    <div class="teaser"><span class="blurmoney" id="teaserAmount">000 €</span></div>
+    <h3 id="emailTitle" class="serif">Votre résultat est prêt 🎉</h3>
+    <p>Entrez votre email pour révéler le détail — on vous envoie aussi votre calcul par mail.</p>
+    <input type="email" id="emailInput" placeholder="vous@email.com" autocomplete="email" inputmode="email" aria-label="Votre adresse email">
+    <button class="btn btn-next" id="emailSubmit">Voir mes économies →</button>
+    <div class="email-err" id="emailErr" aria-live="polite"></div>
+    <p class="email-consent">En validant, vous acceptez de recevoir votre résultat et des communications de GAYA. Désinscription à tout moment.</p>
+    <button class="email-skip" id="emailSkip" type="button">Voir mes économies sans donner mon email</button>
+  </div>
+</div>
+
+<footer class="legal">
+  <p>Estimation indicative à titre informatif. Les coûts réels dépendent du modèle, de l'usage et de l'offre choisie. Sans valeur contractuelle. Les montants de location sont saisis par l'utilisateur et ne représentent aucune offre commerciale tierce nommée. La valeur de revente affichée est une estimation et n'a aucune garantie de réalisation.</p>
+</footer>
+
+<script>
+/* =========================================================================
+   CONFIG — valeurs par défaut, hypothèses & intégration Klaviyo
+   ========================================================================= */
+const CONFIG = {
+  defaults: {
+    months: 36, rentMonthly: 79, rentIns: 5, rentAcc: 5,
+    buyPrice: 2300, buyIns: 90, buyMaint: 120, buyAid: 600, aidOn: true, resale: false
+  },
+  equiv: { coffee: 2.5, dinner: 25, cinema: 40, grocery: 70 },
+  resaleModel: { start: 0.55, decay: 0.0075, floor: 0.15 },
+  chartHorizonCap: 120,
+
+  /* -------- KLAVIYO --------
+     publicKey : votre "Public API Key" (= Site ID, 6 caractères). SAFE côté client.
+                 Settings → API Keys → Public API Key.
+     listId    : (optionnel) ID d'une liste pour abonner les contacts (Lists & Segments → la liste → Settings).
+                 Laissez '' pour ne pas abonner (l'événement seul suffit à déclencher un flow).
+     metric    : nom de l'événement custom déclencheur du flow d'envoi du résultat.
+     Tant que publicKey vaut 'XXXXXX', AUCUN appel réseau n'est fait (mode démo). */
+  klaviyo: {
+    publicKey: 'XXXXXX',
+    listId: '',
+    metric: 'Calcul Location vs Achat GAYA',
+    revision: '2024-10-15'
+  }
+};
+
+/* ------------------------- Helpers ------------------------- */
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const euro  = v => Math.round(v).toLocaleString('fr-FR') + ' €';
+const euro0 = v => Math.round(v).toLocaleString('fr-FR');
+const FIELDS = ['rentMonthly','rentIns','rentAcc','buyPrice','buyIns','buyMaint','buyAid'];
+
+/* Valeur résiduelle estimée d'un GAYA après M mois */
+function residualValue(price, M) {
+  const m = CONFIG.resaleModel;
+  return price * clamp(m.start - m.decay * M, m.floor, m.start);
+}
+
+/* Cœur du calcul */
+function compute(s) {
+  const m_loc  = s.rentMonthly + s.rentIns + s.rentAcc;
+  const r_gaya = (s.buyIns + s.buyMaint) / 12;
+  const netPrice = Math.max(0, s.buyPrice - s.buyAid);
+  const C_loc  = M => m_loc * M;
+  const C_gaya = M => netPrice + r_gaya * M - (s.resale ? residualValue(s.buyPrice, M) : 0);
+
+  let breakEven = null;
+  const valid = m_loc > r_gaya;
+  if (valid) for (let M = 1; M <= 1200; M++) { if (C_gaya(M) <= C_loc(M)) { breakEven = M; break; } }
+
+  const E = C_loc(s.months) - C_gaya(s.months);
+  return { m_loc, r_gaya, netPrice, C_loc, C_gaya, breakEven, valid, E };
+}
+
+/* ------------------------- État ------------------------- */
+function readState() {
+  return {
+    months:      +$('months').value,
+    rentMonthly: +$('rentMonthly').value,
+    rentIns:     +$('rentIns').value,
+    rentAcc:     +$('rentAcc').value,
+    buyPrice:    +$('buyPrice').value,
+    buyIns:      +$('buyIns').value,
+    buyMaint:    +$('buyMaint').value,
+    buyAid:      $('aidOn').checked ? +$('buyAid').value : 0,
+    aidOn:       $('aidOn').checked,
+    resale:      $('resale').checked
+  };
+}
+
+function syncPair(id, val) {
+  const range = $(id), num = $(id + '_n');
+  const v = clamp(isNaN(val) ? +range.value : val, +range.min, +range.max);
+  range.value = v; num.value = v;
+  range.setAttribute('aria-valuenow', v);
+}
+
+/* ------------------------- Compteur animé ------------------------- */
+let counterRAF = null, counterFrom = 0;
+function animateNumber(el, to, suffix = ' €') {
+  cancelAnimationFrame(counterRAF);
+  const from = counterFrom, dur = 700, t0 = performance.now();
+  const ease = x => 1 - Math.pow(1 - x, 3);
+  (function step(now) {
+    const p = clamp((now - t0) / dur, 0, 1);
+    el.textContent = euro0(from + (to - from) * ease(p)) + suffix;
+    if (p < 1) counterRAF = requestAnimationFrame(step); else counterFrom = to;
+  })(performance.now());
+}
+
+/* ============================================================
+   GRAPHIQUE SVG (maison, sans dépendance)
+   ============================================================ */
+function drawChart(s, r) {
+  const W = 720, H = 430;
+  const pad = { l: 72, r: 26, t: 34, b: 56 };
+  const plotW = W - pad.l - pad.r, plotH = H - pad.t - pad.b;
+
+  let xMax = s.months;
+  if (r.valid && r.breakEven) xMax = Math.max(xMax, Math.ceil(r.breakEven * 1.4));
+  xMax = clamp(Math.max(xMax, 12), 12, CONFIG.chartHorizonCap);
+
+  const yMax = Math.max(r.C_loc(xMax), r.C_gaya(xMax), 1) * 1.1;
+  const X = m => pad.l + (m / xMax) * plotW;
+  const Y = v => pad.t + plotH - (v / yMax) * plotH;
+
+  const months = []; for (let m = 0; m <= xMax; m++) months.push(m);
+  const ptsRent = months.map(m => [X(m), Y(r.C_loc(m))]);
+  const ptsGaya = months.map(m => [X(m), Y(r.C_gaya(m))]);
+  const toPath = pts => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+
+  let savingsArea = '';
+  if (r.valid && r.breakEven && r.breakEven <= xMax) {
+    const a = [], b = [];
+    for (let m = r.breakEven; m <= xMax; m++) { a.push([X(m), Y(r.C_loc(m))]); b.push([X(m), Y(r.C_gaya(m))]); }
+    const top = a.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    const bot = b.reverse().map(p=>'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    savingsArea = `<path d="${top} ${bot} Z" fill="var(--gaya-vert)" opacity=".22"/>`;
+  }
+
+  let grid = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = (yMax / 1.1) * (i / 4), y = Y(v);
+    grid += `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${W-pad.r}" y2="${y.toFixed(1)}" stroke="#ece6d8" stroke-width="1"/>`;
+    grid += `<text x="${pad.l-10}" y="${(y+5).toFixed(1)}" text-anchor="end" font-size="14" fill="#8b95a0">${euro0(v)} €</text>`;
+  }
+  let xlab = '';
+  [...new Set([0, Math.round(xMax/3), Math.round(2*xMax/3), xMax])].forEach(m => {
+    xlab += `<text x="${X(m).toFixed(1)}" y="${H-pad.b+28}" text-anchor="middle" font-size="14" fill="#8b95a0">${m} mois</text>`;
+  });
+
+  const xNow = X(s.months);
+  const nowLine = `<line x1="${xNow.toFixed(1)}" y1="${pad.t}" x2="${xNow.toFixed(1)}" y2="${pad.t+plotH}" stroke="var(--gaya-night)" stroke-width="2" stroke-dasharray="5 5" opacity=".5"/>`;
+
+  const yLocNow = Y(r.C_loc(s.months)), yGayaNow = Y(r.C_gaya(s.months));
+  const labelLeft = xNow > W * 0.62;
+  const tx = labelLeft ? xNow - 12 : xNow + 12, anchor = labelLeft ? 'end' : 'start';
+  const valueLabels = `
+    <text x="${tx.toFixed(1)}" y="${(yLocNow - 12).toFixed(1)}" text-anchor="${anchor}" font-size="15" font-weight="800" fill="var(--gaya-orange)">${euro(r.C_loc(s.months))}</text>
+    <text x="${tx.toFixed(1)}" y="${(yGayaNow + 22).toFixed(1)}" text-anchor="${anchor}" font-size="15" font-weight="800" fill="var(--gaya-teal)">${euro(r.C_gaya(s.months))}</text>`;
+
+  let beMarker = '';
+  if (r.valid && r.breakEven && r.breakEven <= xMax) {
+    const bx = X(r.breakEven), by = Y(r.C_gaya(r.breakEven));
+    const bw = 150, bh = 30, cx = clamp(bx, pad.l + bw/2, W - pad.r - bw/2);
+    const badgeY = (by - 26 - bh/2 < pad.t) ? by + 26 : by - 26;
+    beMarker = `
+      <line x1="${bx.toFixed(1)}" y1="${pad.t}" x2="${bx.toFixed(1)}" y2="${(pad.t+plotH).toFixed(1)}" stroke="var(--gaya-teal)" stroke-width="1.5" opacity=".4"/>
+      <rect x="${(cx-bw/2).toFixed(1)}" y="${(badgeY-bh/2).toFixed(1)}" width="${bw}" height="${bh}" rx="15" fill="var(--gaya-teal)"/>
+      <text x="${cx.toFixed(1)}" y="${(badgeY+5).toFixed(1)}" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">Bascule · mois ${r.breakEven}</text>
+      <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="9" fill="#fff" stroke="var(--gaya-teal)" stroke-width="4"/>`;
+  }
+
+  $('chart').innerHTML = `
+    ${grid}${xlab}${savingsArea}${nowLine}
+    <path d="${toPath(ptsRent)}" fill="none" stroke="var(--gaya-orange)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${toPath(ptsGaya)}" fill="none" stroke="var(--gaya-teal)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${beMarker}
+    <circle cx="${xNow.toFixed(1)}" cy="${yLocNow.toFixed(1)}" r="7" fill="#fff" stroke="var(--gaya-orange)" stroke-width="4"/>
+    <circle cx="${xNow.toFixed(1)}" cy="${yGayaNow.toFixed(1)}" r="7" fill="#fff" stroke="var(--gaya-teal)" stroke-width="4"/>
+    ${valueLabels}`;
+}
+
+/* ============================================================
+   RENDU GLOBAL
+   ============================================================ */
+function render() {
+  const s = readState();
+  const r = compute(s);
+
+  // Durée
+  $('durMonthsBig').textContent = s.months;
+  $('months').setAttribute('aria-valuenow', s.months);
+  if (+$('months_n').value !== s.months) $('months_n').value = s.months;
+  const yrs = s.months / 12;
+  $('durYears').textContent = 'soit ' + (Number.isInteger(yrs) ? yrs : yrs.toFixed(1).replace('.', ',')) + (yrs >= 2 ? ' ans' : ' an');
+  $('tblMonths').textContent = s.months;
+
+  // Totaux blocs
+  $('rentPerMonth').textContent = euro(r.m_loc);
+  $('buyPerMonth').textContent  = euro(r.r_gaya);
+  $('buyNetPrice').textContent  = euro(r.netPrice);
+  $('aidRow').classList.toggle('is-off', !s.aidOn);
+
+  drawChart(s, r);
+
+  // Verdict
+  const vEl = $('verdict'), pill = $('verdictPill'), big = $('bigNumber'), cap = $('bigCaption'), sub = $('subline');
+  if (!r.valid) {
+    vEl.className = 'verdict err';
+    pill.textContent = '🤔 Paramètres à ajuster';
+    counterFrom = 0; big.textContent = '—';
+    cap.innerHTML = "Avec ces réglages, la location ne dépasse jamais le coût d'un GAYA.";
+    sub.textContent = "Les frais récurrents GAYA dépassent le loyer mensuel : augmentez le loyer ou baissez les frais GAYA.";
+  } else if (s.months < r.breakEven) {
+    vEl.className = 'verdict wait';
+    pill.textContent = '⏳ Bientôt rentable';
+    animateNumber(big, Math.abs(r.E), ' €');
+    cap.innerHTML = `de surcoût pour l'instant — c'est l'investissement de départ`;
+    sub.innerHTML = `Encore <b>${r.breakEven - s.months} mois</b> avant que l'achat devienne plus rentable (bascule au mois <b>${r.breakEven}</b>).`;
+  } else {
+    vEl.className = 'verdict win';
+    pill.textContent = 'GAYA est gagnant 🎉';
+    animateNumber(big, r.E, ' €');
+    cap.innerHTML = `économisés en choisissant GAYA<br><b>soit ~${euro(r.E / s.months)} / mois</b> qui restent chez vous`;
+    sub.innerHTML = `Vous avez dépassé le point de bascule au <b>mois ${r.breakEven}</b>. Chaque mois qui passe creuse l'écart en votre faveur.`;
+  }
+
+  renderTable(s, r);
+  renderEquiv(r.E);
+  return { s, r };
+}
+
+function renderTable(s, r) {
+  const M = s.months;
+  const rows = [
+    ['Loyer / abonnement', s.rentMonthly * M, 0],
+    ['Assurance',          s.rentIns * M,     (s.buyIns / 12) * M],
+    ['Accessoires / entretien', s.rentAcc * M, (s.buyMaint / 12) * M],
+    ["Achat du vélo",      0,                 s.buyPrice]
+  ];
+  if (s.buyAid > 0) rows.push(['Aides au financement (prime)', 0, -s.buyAid]);
+  if (s.resale)     rows.push(['Valeur de revente (estim.)',   0, -residualValue(s.buyPrice, M)]);
+
+  $('tblBody').innerHTML = rows.map(([label, rent, buy]) => {
+    const d = rent - buy;
+    const cls = d > 0 ? 'diff-pos' : (d < 0 ? 'diff-neg' : '');
+    const txt = d === 0 ? '—' : (d > 0 ? '+ ' : '− ') + euro(Math.abs(d));
+    return `<tr><td>${label}</td><td class="${cls}">${txt}</td></tr>`;
+  }).join('');
+
+  const totRent = r.C_loc(M), totBuy = r.C_gaya(M), save = totRent - totBuy;
+  $('tblTotRent').textContent = euro(totRent);
+  $('tblTotBuy').textContent  = euro(totBuy);
+  const cell = $('tblTotSave');
+  cell.textContent = (save >= 0 ? '+ ' : '− ') + euro(Math.abs(save));
+  cell.className = save >= 0 ? 'save-pos' : 'save-neg';
+}
+
+function renderEquiv(E) {
+  const sec = $('equivSection');
+  if (E <= 0) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  const e = CONFIG.equiv;
+  $('eqCoffee').textContent  = Math.floor(E / e.coffee).toLocaleString('fr-FR');
+  $('eqDinner').textContent  = Math.floor(E / e.dinner).toLocaleString('fr-FR');
+  $('eqCinema').textContent  = Math.floor(E / e.cinema).toLocaleString('fr-FR');
+  $('eqGrocery').textContent = Math.floor(E / e.grocery).toLocaleString('fr-FR');
+}
+
+/* ============================================================
+   WIZARD — navigation entre étapes
+   ============================================================ */
+const STEP_NAMES = { 1: 'Durée', 2: 'Votre location', 3: 'Le GAYA', 4: 'Résultat' };
+const TOTAL_STEPS = 4;
+let currentStep = 1;
+let unlocked = false; // l'email a-t-il déjà été fourni ?
+
+function showStep(n) {
+  currentStep = clamp(n, 1, TOTAL_STEPS);
+  document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', +el.dataset.step === currentStep));
+  $('progressFill').style.width = (currentStep / TOTAL_STEPS * 100) + '%';
+  $('stepLabel').textContent = `Étape ${currentStep} / ${TOTAL_STEPS}`;
+  $('stepName').textContent = STEP_NAMES[currentStep];
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (currentStep === TOTAL_STEPS) enterResult();
+}
+
+function enterResult() {
+  const { r } = render();                 // recalcule + dessine le graphe pendant qu'il est visible
+  if (unlocked) return;                   // déjà débloqué : on ne re-gate pas
+  // Affiche le montant flouté + ouvre l'overlay email
+  $('teaserAmount').textContent = (r.valid ? (r.E >= 0 ? '+ ' : '') : '') + (r.valid ? euro(Math.abs(r.E)) : '••• €');
+  $('resultContent').classList.add('locked');
+  $('emailOverlay').classList.remove('hidden');
+  setTimeout(() => $('emailInput').focus(), 250);
+}
+
+function unlockResult() {
+  unlocked = true;
+  $('emailOverlay').classList.add('hidden');
+  $('resultContent').classList.remove('locked');
+  counterFrom = 0;            // le grand chiffre s'anime depuis 0 à la révélation
+  render();
+}
+
+/* ============================================================
+   KLAVIYO — abonnement + événement (côté client, clé publique)
+   ============================================================ */
+function buildEventProps() {
+  const s = readState(), r = compute(s);
+  return {
+    duree_mois: s.months,
+    cout_location_mensuel: Math.round(r.m_loc),
+    frais_gaya_mensuel: Math.round(r.r_gaya),
+    prix_achat: s.buyPrice,
+    aides: s.buyAid,
+    prix_net: Math.round(r.netPrice),
+    revente_incluse: s.resale,
+    mois_bascule: r.breakEven,
+    economie_totale: Math.round(r.E),
+    economie_mensuelle: Math.round(r.E / s.months),
+    verdict: !r.valid ? 'invalide' : (s.months < r.breakEven ? 'avant_bascule' : 'gagnant'),
+    equiv_cafes: Math.max(0, Math.floor(r.E / CONFIG.equiv.coffee)),
+    equiv_diners: Math.max(0, Math.floor(r.E / CONFIG.equiv.dinner)),
+    equiv_cines: Math.max(0, Math.floor(r.E / CONFIG.equiv.cinema)),
+    equiv_courses: Math.max(0, Math.floor(r.E / CONFIG.equiv.grocery)),
+    page_url: location.href
+  };
+}
+
+async function klaviyoSubmit(email) {
+  const K = CONFIG.klaviyo;
+  // Mode démo : pas de clé → on n'appelle rien (mais on débloque quand même)
+  if (!K.publicKey || K.publicKey === 'XXXXXX') {
+    console.info('[Klaviyo] Mode démo — renseignez CONFIG.klaviyo.publicKey pour activer l\'envoi.', { email, props: buildEventProps() });
+    return true;
+  }
+  const headers = { 'Content-Type': 'application/json', revision: K.revision };
+  const tasks = [];
+
+  // 1) Abonnement à une liste (optionnel, avec consentement marketing)
+  if (K.listId) {
+    tasks.push(fetch(`https://a.klaviyo.com/client/subscriptions/?company_id=${K.publicKey}`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ data: { type: 'subscription', attributes: {
+        profile: { data: { type: 'profile', attributes: {
+          email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } }
+        } } }
+      }, relationships: { list: { data: { type: 'list', id: K.listId } } } } })
+    }));
+  }
+
+  // 2) Événement custom (déclencheur du flow d'envoi du résultat)
+  tasks.push(fetch(`https://a.klaviyo.com/client/events/?company_id=${K.publicKey}`, {
+    method: 'POST', headers,
+    body: JSON.stringify({ data: { type: 'event', attributes: {
+      properties: buildEventProps(),
+      metric: { data: { type: 'metric', attributes: { name: K.metric } } },
+      profile: { data: { type: 'profile', attributes: { email } } }
+    } } })
+  }));
+
+  const results = await Promise.allSettled(tasks);
+  const ok = results.every(x => x.status === 'fulfilled' && x.value.ok);
+  if (!ok) console.warn('[Klaviyo] Une requête a échoué :', results);
+  return true; // on ne bloque jamais l'utilisateur, même si Klaviyo échoue
+}
+
+/* Validation email simple */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function onEmailSubmit() {
+  const email = $('emailInput').value.trim();
+  const err = $('emailErr'), btn = $('emailSubmit');
+  if (!EMAIL_RE.test(email)) { err.textContent = 'Veuillez saisir un email valide.'; return; }
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Un instant…';
+  try { await klaviyoSubmit(email); }
+  catch (e) { console.warn(e); }
+  finally {
+    btn.disabled = false; btn.textContent = 'Voir mes économies →';
+    unlockResult();
+  }
+}
+
+/* ============================================================
+   ÉVÉNEMENTS
+   ============================================================ */
+// Navigation
+document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => showStep(currentStep + 1)));
+document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => showStep(currentStep - 1)));
+document.querySelector('[data-restart]').addEventListener('click', resetAll);
+
+// Durée
+$('months').addEventListener('input', render);
+$('months_n').addEventListener('input', () => { syncPair('months', +$('months_n').value); render(); });
+$('months_n').addEventListener('blur',  () => { syncPair('months', +$('months_n').value); render(); });
+
+// Paires slider <-> numérique
+FIELDS.forEach(id => {
+  $(id).addEventListener('input', () => { syncPair(id, +$(id).value); render(); });
+  $(id + '_n').addEventListener('input', () => { syncPair(id, +$(id + '_n').value); render(); });
+  $(id + '_n').addEventListener('blur', () => { syncPair(id, +$(id + '_n').value); render(); });
+});
+
+// Toggles
+$('resale').addEventListener('change', render);
+$('aidOn').addEventListener('change', render);
+
+// Email
+$('emailSubmit').addEventListener('click', onEmailSubmit);
+$('emailInput').addEventListener('keydown', e => { if (e.key === 'Enter') onEmailSubmit(); });
+// Sortie discrète : on débloque le résultat sans envoyer d'email à Klaviyo
+$('emailSkip').addEventListener('click', () => unlockResult());
+
+/* Réinitialisation complète (recommencer) */
+function resetAll() {
+  const d = CONFIG.defaults;
+  $('months').value = d.months;
+  FIELDS.forEach(id => syncPair(id, d[id]));
+  $('aidOn').checked = d.aidOn;
+  $('resale').checked = d.resale;
+  counterFrom = 0;
+  render();
+  showStep(1);
+}
+
+/* ------------------------- Init ------------------------- */
+(function init() {
+  const d = CONFIG.defaults;
+  $('months').value = d.months;
+  FIELDS.forEach(id => syncPair(id, d[id]));
+  $('aidOn').checked = d.aidOn;
+  $('resale').checked = d.resale;
+  render();
+  showStep(1);
+})();
+</script>
+</body>
+</html>
