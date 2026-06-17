@@ -32,11 +32,14 @@ Collez ce snippet sur n'importe quelle page de votre site :
   var ORIGIN = 'https://calculateur-gaya.vercel.app';
   var iframe = document.getElementById('gaya-calc');
 
-  // Hauteur dynamique
+  // Messages depuis l'iframe
   window.addEventListener('message', function (e) {
     if (e.origin !== ORIGIN) return;
     if (e.data && e.data.type === 'gaya-calc-height') {
       iframe.style.height = e.data.height + 'px';
+    }
+    if (e.data && e.data.type === 'gaya-scroll-top') {
+      window.scrollTo({ top: iframe.offsetTop - 20, behavior: 'smooth' });
     }
   });
 
