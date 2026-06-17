@@ -508,8 +508,11 @@ function unlockResult() {
   unlocked = true;
   $('emailOverlay').classList.add('hidden');
   $('resultContent').classList.remove('locked');
+  const inIframe = window.self !== window.top;
+  console.log('[ScrollTop] unlockResult — inIframe:', inIframe, '| scrollY avant:', window.scrollY);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (window.self !== window.top) {
+  if (inIframe) {
+    console.log('[ScrollTop] postMessage gaya-scroll-top → parent');
     window.parent.postMessage({ type: 'gaya-scroll-top' }, '*');
   }
   counterFrom = 0;            // le grand chiffre s'anime depuis 0 à la révélation
