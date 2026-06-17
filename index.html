@@ -481,6 +481,7 @@ const STEP_NAMES = { 1: 'Durée', 2: 'Votre location', 3: 'Le GAYA', 4: 'Résult
 const TOTAL_STEPS = 4;
 let currentStep = 1;
 let unlocked = false; // l'email a-t-il déjà été fourni ?
+let lastEmail = '';   // mémorise l'email pour pré-remplir à la 2e simulation
 
 function showStep(n) {
   currentStep = clamp(n, 1, TOTAL_STEPS);
@@ -500,6 +501,7 @@ function enterResult() {
   $('teaserAmount').textContent = (r.valid ? (r.E >= 0 ? '+ ' : '') : '') + (r.valid ? euro(Math.abs(r.E)) : '••• €');
   $('resultContent').classList.add('locked');
   $('emailOverlay').classList.remove('hidden');
+  if (lastEmail) $('emailInput').value = lastEmail;
   if (typeof window._iframePositionOverlay === 'function') window._iframePositionOverlay();
   setTimeout(() => $('emailInput').focus(), 250);
 }
@@ -592,7 +594,7 @@ async function onEmailSubmit() {
 
   err.textContent = '';
   btn.disabled = true; btn.textContent = 'Un instant…';
-  try { await klaviyoSubmit(email, token); }
+  try { await klaviyoSubmit(email, token); lastEmail = email; }
   catch (e) { console.warn('[Email] Erreur inattendue', e); }
   finally {
     btn.disabled = false; btn.textContent = 'Voir mes économies →';
@@ -639,6 +641,7 @@ function resetAll() {
   $('aidOn').checked = d.aidOn;
   $('resale').checked = d.resale;
   counterFrom = 0;
+  unlocked = false;
   render();
   showStep(1);
   window.scrollTo({ top: 0, behavior: 'smooth' });
