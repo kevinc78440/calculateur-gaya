@@ -638,6 +638,10 @@ function resetAll() {
   counterFrom = 0;
   render();
   showStep(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.self !== window.top) {
+    window.parent.postMessage({ type: 'gaya-scroll-top' }, '*');
+  }
 }
 
 /* ------------------------- Hauteur dynamique pour intégration iframe ------------------------- */
