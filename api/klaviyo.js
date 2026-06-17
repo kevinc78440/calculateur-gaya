@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
         attributes: {
           properties: props || {},
           metric: { data: { type: 'metric', attributes: { name: metric || 'result' } } },
-          profile: { data: { type: 'profile', attributes: { email } } }
+          profile: { data: { type: 'profile', attributes: { email, ...(props || {}) } } }
         }
       }
     };
