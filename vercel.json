@@ -1,3 +1,15 @@
 {
-  "version": 2
+  "version": 2,
+  "builds": [
+    { "src": "api/config.js",  "use": "@vercel/node" },
+    { "src": "api/klaviyo.js", "use": "@vercel/node" },
+    { "src": "index.html",     "use": "@vercel/static" },
+    { "src": "styles.css",     "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/config",  "dest": "/api/config.js"  },
+    { "src": "/api/klaviyo", "dest": "/api/klaviyo.js" },
+    { "src": "/styles.css",  "dest": "/styles.css"     },
+    { "src": "/(.*)",        "dest": "/index.html"      }
+  ]
 }
