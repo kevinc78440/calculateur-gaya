@@ -9,15 +9,84 @@ duquel l'achat devient plus rentable.
 - Calcul en temps réel, graphique de coût cumulé, tableau de détail, équivalents « plaisir »
 - Aides au financement (désactivables) et valeur de revente estimée (option)
 - Capture d'email (résultat flouté débloqué par l'email) + intégration **Klaviyo**
-- 100 % autonome : un seul fichier `index.html` (logo et styles inclus)
+- Vérification antispam **Cloudflare Turnstile**
+
+---
+
+## Intégration iframe (hauteur dynamique)
+
+Collez ce snippet sur n'importe quelle page de votre site :
+
+```html
+<!-- Calculateur GAYA — intégration iframe -->
+<iframe
+  id="gaya-calc"
+  src="https://calculateur-gaya.vercel.app/"
+  width="100%"
+  frameborder="0"
+  scrolling="no"
+  style="border:none;width:100%;display:block;min-height:600px;">
+</iframe>
+<script>
+window.addEventListener('message', function(e) {
+  if (e.origin !== 'https://calculateur-gaya.vercel.app') return;
+  if (e.data && e.data.type === 'gaya-calc-height') {
+    document.getElementById('gaya-calc').style.height = e.data.height + 'px';
+  }
+});
+</script>
+```
+
+Le calculateur envoie sa hauteur via `postMessage` à chaque changement de taille (`ResizeObserver`).
+L'iframe s'adapte automatiquement — pas de scroll interne, pas de barre de défilement.
+
+---
+
+## Variables Klaviyo — template email
+
+L'événement Klaviyo déclenché s'appelle **`Calcul Location vs Achat GAYA`**.
+
+Dans votre template de flow, utilisez la syntaxe `{{ event.NOM_VARIABLE }}` :
+
+| Variable | Description | Exemple |
+|---|---|---|
+| `{{ event.duree_mois }}` | Durée choisie | `36` |
+| `{{ event.cout_location_mensuel }}` | Coût location/mois | `89` |
+| `{{ event.frais_gaya_mensuel }}` | Frais GAYA/mois (hors achat) | `18` |
+| `{{ event.prix_achat }}` | Prix d'achat brut | `2300` |
+| `{{ event.aides }}` | Aides déduites | `600` |
+| `{{ event.prix_net }}` | Prix net après aides | `1700` |
+| `{{ event.mois_bascule }}` | Mois où l'achat devient rentable | `21` |
+| `{{ event.economie_totale }}` | Économie totale sur la durée (€) | `524` |
+| `{{ event.economie_mensuelle }}` | Économie moyenne par mois (€) | `14` |
+| `{{ event.verdict }}` | `gagnant` / `avant_bascule` / `invalide` | `gagnant` |
+| `{{ event.equiv_cafes }}` | Équivalent en cafés | `209` |
+| `{{ event.equiv_diners }}` | Équivalent en dîners resto | `20` |
+| `{{ event.equiv_cines }}` | Équivalent en sorties ciné | `13` |
+| `{{ event.equiv_courses }}` | Équivalent en pleins de courses | `7` |
+| `{{ event.page_url }}` | URL de la page source | `https://…` |
+| `{{ person.email }}` | Email du contact | `prenom@…` |
+
+**Exemple de ligne dans le template :**
+```
+En {{ event.duree_mois }} mois, vous économisez {{ event.economie_totale }} € — soit {{ event.economie_mensuelle }} €/mois.
+Le point de bascule est atteint au mois {{ event.mois_bascule }}.
+```
+
+---
+
+## Configuration serveur (`.env`)
+
+```
+PORT=3000
+KLAVIYO_API_KEY=pk_...          # Clé privée Klaviyo (Settings → API Keys)
+TURNSTILE_SITEKEY=...           # Clé publique Cloudflare Turnstile
+TURNSTILE_SECRET_KEY=...        # Clé secrète Cloudflare Turnstile
+```
 
 ## Publier
-Le site est un fichier statique unique. Au choix :
-- **Netlify Drop** : glisser `index.html` sur https://app.netlify.com/drop
-- **GitHub Pages** : Settings → Pages → Branch `main` → `/ (root)`
-
-## Configuration Klaviyo
-Voir le bloc `CONFIG.klaviyo` en haut de `index.html` (clé publique + List ID).
+- **Vercel** : `vercel deploy` ou connexion GitHub → déploiement automatique
+- **Netlify Drop** : glisser le dossier sur https://app.netlify.com/drop
 
 ---
 *Estimation indicative à titre informatif, sans valeur contractuelle.*

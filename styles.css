@@ -13,7 +13,7 @@
   --gaya-rouge:   #ED4C5C;
   --white:        #FFFFFF;
 
-  --bg:           var(--gaya-cream);
+  --bg:           var(--white);
   --ink:          var(--gaya-night);
   --primary:      var(--gaya-teal);
   --rent-color:   var(--gaya-orange);
@@ -217,7 +217,7 @@ table.detail tfoot tr.grand td.save-neg { color: var(--gaya-orange); }
 .cta-final h3 { color: var(--white); font-size: 1.5rem; }
 .cta-final h3 em { color: var(--gaya-sun); font-style: italic; }
 .cta-final p { opacity: .9; margin-inline: auto; max-width: 36ch; }
-.cta-btn { display: inline-block; margin-top: 12px; background: var(--gaya-sun); color: var(--gaya-night); font-weight: 800; font-size: 1.08rem; text-decoration: none; padding: 15px 32px; border-radius: 99px; box-shadow: 0 14px 30px -14px rgba(255,208,102,.9); transition: transform .12s; }
+.cta-btn { display: inline-block; margin-top: 12px; background: var(--gaya-sun); color: var(--gaya-night); font-weight: 800; font-size: 1.08rem; text-decoration: none; padding: 15px 32px; border-radius: 99px; transition: transform .12s; }
 .cta-btn:hover { transform: translateY(-2px); }
 .result-restart { text-align: center; margin-top: 22px; }
 

@@ -2,51 +2,110 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-// dynamic import of fetch for Node versions without global fetch
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const KLAVIYO_KEY = process.env.KLAVIYO_API_KEY || '';
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || '';
+const TURNSTILE_SITEKEY = process.env.TURNSTILE_SITEKEY || '';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+app.get('/api/config', (_req, res) => {
+  res.json({ turnstileSitekey: TURNSTILE_SITEKEY });
+});
+
 app.post('/api/klaviyo', async (req, res) => {
-  const { email, props, listId, metric, revision } = req.body || {};
-  // If no server key is provided, operate in demo mode (log only)
-  if (!KLAVIYO_KEY || KLAVIYO_KEY === 'XXXXXX') {
-    console.info('[Server Klaviyo] Mode demo — clé manquante. Payload:', { email, props });
+  const { email, props, listId, metric, revision, turnstileToken } = req.body || {};
+
+  if (TURNSTILE_SECRET) {
+    if (!turnstileToken) return res.status(400).json({ ok: false, error: 'captcha_missing' });
+    try {
+      const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: TURNSTILE_SECRET, response: turnstileToken, remoteip: req.ip })
+      });
+      const tsData = await tsRes.json();
+      if (!tsData.success) return res.status(400).json({ ok: false, error: 'captcha_failed' });
+    } catch (err) {
+      console.error('[Turnstile]', err);
+      return res.status(500).json({ ok: false, error: 'captcha_error' });
+    }
+  }
+
+  if (!KLAVIYO_KEY) {
+    console.info('[Klaviyo] Mode demo — clé manquante. Payload:', { email, props });
     return res.json({ ok: true, demo: true });
   }
 
+  const rev = revision || '2024-10-15';
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Klaviyo-API-Key ${KLAVIYO_KEY}`,
+    'revision': rev
+  };
+
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (revision) headers.revision = revision;
     const tasks = [];
 
     if (listId) {
-      const body = { data: { type: 'subscription', attributes: {
-        profile: { data: { type: 'profile', attributes: { email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } } } },
-      }, relationships: { list: { data: { type: 'list', id: listId } } } } };
-      tasks.push(fetch(`https://a.klaviyo.com/client/subscriptions/?company_id=${encodeURIComponent(KLAVIYO_KEY)}`, {
-        method: 'POST', headers, body: JSON.stringify(body)
-      }));
+      // API serveur : endpoint bulk-create avec clé privée
+      const subBody = {
+        data: {
+          type: 'profile-subscription-bulk-create-job',
+          attributes: {
+            profiles: {
+              data: [{
+                type: 'profile',
+                attributes: {
+                  email,
+                  subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } }
+                }
+              }]
+            }
+          },
+          relationships: { list: { data: { type: 'list', id: listId } } }
+        }
+      };
+      tasks.push(
+        fetch('https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/', {
+          method: 'POST', headers, body: JSON.stringify(subBody)
+        })
+      );
     }
 
-    const eventBody = { data: { type: 'event', attributes: {
-      properties: props || {},
-      metric: { data: { type: 'metric', attributes: { name: metric || 'result' } } },
-      profile: { data: { type: 'profile', attributes: { email } } }
-    } } };
-    tasks.push(fetch(`https://a.klaviyo.com/client/events/?company_id=${encodeURIComponent(KLAVIYO_KEY)}`, {
-      method: 'POST', headers, body: JSON.stringify(eventBody)
-    }));
+    const eventBody = {
+      data: {
+        type: 'event',
+        attributes: {
+          properties: props || {},
+          metric: { data: { type: 'metric', attributes: { name: metric || 'result' } } },
+          profile: { data: { type: 'profile', attributes: { email } } }
+        }
+      }
+    };
+    tasks.push(
+      fetch('https://a.klaviyo.com/api/events/', {
+        method: 'POST', headers, body: JSON.stringify(eventBody)
+      })
+    );
 
     const results = await Promise.allSettled(tasks);
+
+    // Log les erreurs API pour faciliter le debug
+    for (const r of results) {
+      if (r.status === 'fulfilled' && !r.value.ok) {
+        const body = await r.value.text().catch(() => '');
+        console.error('[Klaviyo] Erreur API', r.value.status, body);
+      }
+    }
+
     return res.json({ ok: true, results: results.map(r => r.status) });
   } catch (err) {
-    console.error(err);
+    console.error('[Klaviyo]', err);
     return res.status(500).json({ ok: false, error: String(err) });
   }
 });
