@@ -499,6 +499,7 @@ function enterResult() {
   $('teaserAmount').textContent = (r.valid ? (r.E >= 0 ? '+ ' : '') : '') + (r.valid ? euro(Math.abs(r.E)) : '••• €');
   $('resultContent').classList.add('locked');
   $('emailOverlay').classList.remove('hidden');
+  if (typeof window._iframePositionOverlay === 'function') window._iframePositionOverlay();
   setTimeout(() => $('emailInput').focus(), 250);
 }
 
@@ -620,6 +621,34 @@ function postHeight() {
 if (window.ResizeObserver) {
   new ResizeObserver(postHeight).observe(document.body);
 }
+
+/* ------------------------- Positionnement overlay fixe en mode iframe ------------------------- */
+(function () {
+  if (window.self === window.top) return; // pas en iframe
+
+  var parentState = { scrollY: 0, iframeTop: 0, viewportHeight: window.innerHeight };
+
+  function positionOverlay() {
+    var overlay = document.getElementById('emailOverlay');
+    if (!overlay || overlay.classList.contains('hidden')) return;
+    var top = Math.max(0, parentState.scrollY - parentState.iframeTop + 100);
+    var height = parentState.viewportHeight - 100;
+    overlay.style.position = 'absolute';
+    overlay.style.inset = 'unset';
+    overlay.style.left = '0';
+    overlay.style.right = '0';
+    overlay.style.top = top + 'px';
+    overlay.style.height = Math.max(height, 200) + 'px';
+  }
+
+  window.addEventListener('message', function (e) {
+    if (!e.data || e.data.type !== 'gaya-parent-scroll') return;
+    parentState = e.data;
+    positionOverlay();
+  });
+
+  window._iframePositionOverlay = positionOverlay;
+})();
 
 /* ------------------------- Init ------------------------- */
 let turnstileWidgetId = null;

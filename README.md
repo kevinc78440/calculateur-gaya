@@ -28,17 +28,38 @@ Collez ce snippet sur n'importe quelle page de votre site :
   style="border:none;width:100%;display:block;min-height:600px;">
 </iframe>
 <script>
-window.addEventListener('message', function(e) {
-  if (e.origin !== 'https://calculateur-gaya.vercel.app') return;
-  if (e.data && e.data.type === 'gaya-calc-height') {
-    document.getElementById('gaya-calc').style.height = e.data.height + 'px';
+(function () {
+  var ORIGIN = 'https://calculateur-gaya.vercel.app';
+  var iframe = document.getElementById('gaya-calc');
+
+  // Hauteur dynamique
+  window.addEventListener('message', function (e) {
+    if (e.origin !== ORIGIN) return;
+    if (e.data && e.data.type === 'gaya-calc-height') {
+      iframe.style.height = e.data.height + 'px';
+    }
+  });
+
+  // Scroll du parent → position de la popup email dans l'iframe
+  function sendScroll() {
+    if (!iframe.contentWindow) return;
+    var rect = iframe.getBoundingClientRect();
+    iframe.contentWindow.postMessage({
+      type: 'gaya-parent-scroll',
+      scrollY: window.scrollY,
+      iframeTop: rect.top + window.scrollY,
+      viewportHeight: window.innerHeight
+    }, ORIGIN);
   }
-});
+  window.addEventListener('scroll', sendScroll, { passive: true });
+  window.addEventListener('resize', sendScroll, { passive: true });
+  iframe.addEventListener('load', sendScroll);
+})();
 </script>
 ```
 
 Le calculateur envoie sa hauteur via `postMessage` à chaque changement de taille (`ResizeObserver`).
-L'iframe s'adapte automatiquement — pas de scroll interne, pas de barre de défilement.
+Le parent envoie sa position de scroll à l'iframe pour que la popup email reste à 100 px du haut du viewport parent, même quand la page défile.
 
 ---
 

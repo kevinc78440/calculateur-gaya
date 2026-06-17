@@ -224,7 +224,7 @@ table.detail tfoot tr.grand td.save-neg { color: var(--gaya-orange); }
 /* ============================== Email overlay ============================== */
 .email-overlay {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(45,57,68,.55); backdrop-filter: blur(2px);
+  background: rgb(255 254 254 / 55%); backdrop-filter: blur(2px);
   display: grid; place-items: center; padding: 18px;
   animation: fadeIn .3s ease;
 }
