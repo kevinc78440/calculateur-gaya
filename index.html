@@ -186,7 +186,8 @@
           <h3 class="serif">Et si vous l'essayiez <em>pour de vrai</em> ?</h3>
           <p>Le meilleur calcul, c'est celui qu'on fait en roulant. Réservez un essai, sans engagement.</p>
           <a class="cta-btn" id="ctaBtn"
-             href="https://gaya.bike/reserver-un-essai?utm_source=calculateur-location&utm_medium=landing-page&utm_campaign=achat-vs-location">
+             href="https://gaya.bike/reserver-un-essai?utm_source=calculateur-location&utm_medium=landing-page&utm_campaign=achat-vs-location"
+             target="_blank" rel="noopener noreferrer">
              Essayer un GAYA →
           </a>
         </div>
@@ -544,21 +545,23 @@ function buildEventProps() {
 async function klaviyoSubmit(email, turnstileToken) {
   const K = CONFIG.klaviyo;
   const payload = { email, props: buildEventProps(), listId: K.listId, metric: K.metric, revision: K.revision, turnstileToken };
+  console.log('[Klaviyo] Envoi vers /api/klaviyo', { email, listId: K.listId, metric: K.metric, tokenOk: !!turnstileToken });
   try {
     const resp = await fetch('/api/klaviyo', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await resp.json().catch(() => ({}));
+    console.log('[Klaviyo] Réponse serveur', { status: resp.status, ok: resp.ok, data });
     if (!resp.ok) {
-      console.warn('[Klaviyo] HTTP', resp.status, data);
+      console.warn('[Klaviyo] Erreur HTTP', resp.status, data);
     } else if (data.demo) {
-      console.warn('[Klaviyo] MODE DEMO — variable KLAVIYO_API_KEY absente sur le serveur');
+      console.warn('[Klaviyo] MODE DEMO — variable KLAVIYO_API_KEY absente sur Vercel');
     } else {
-      console.log('[Klaviyo] ok', data);
+      console.log('[Klaviyo] Succès ✓', data);
     }
   } catch (err) {
-    console.warn('[Klaviyo] erreur réseau', err);
+    console.warn('[Klaviyo] Erreur réseau (fetch échoué)', err);
   }
   return true;
 }
@@ -569,16 +572,29 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 async function onEmailSubmit() {
   const email = $('emailInput').value.trim();
   const err = $('emailErr'), btn = $('emailSubmit');
-  if (!EMAIL_RE.test(email)) { err.textContent = 'Veuillez saisir un email valide.'; return; }
-  const token = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
-  if (!token) { err.textContent = 'Veuillez compléter la vérification antispam.'; return; }
+  console.log('[Email] Soumission déclenchée', { email });
+
+  if (!EMAIL_RE.test(email)) {
+    console.warn('[Email] Format email invalide');
+    err.textContent = 'Veuillez saisir un email valide.'; return;
+  }
+
+  const turnstileLoaded = typeof turnstile !== 'undefined';
+  const token = turnstileLoaded ? turnstile.getResponse() : '';
+  console.log('[Turnstile]', { loaded: turnstileLoaded, widgetId: turnstileWidgetId, tokenOk: !!token });
+
+  if (!token) {
+    console.warn('[Turnstile] Token vide — captcha non complété ou widget non rendu');
+    err.textContent = 'Veuillez compléter la vérification antispam.'; return;
+  }
+
   err.textContent = '';
   btn.disabled = true; btn.textContent = 'Un instant…';
   try { await klaviyoSubmit(email, token); }
-  catch (e) { console.warn(e); }
+  catch (e) { console.warn('[Email] Erreur inattendue', e); }
   finally {
     btn.disabled = false; btn.textContent = 'Voir mes économies →';
-    if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) turnstile.reset(turnstileWidgetId);
+    if (turnstileLoaded && turnstileWidgetId !== null) turnstile.reset(turnstileWidgetId);
     unlockResult();
   }
 }
