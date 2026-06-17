@@ -544,11 +544,18 @@ async function klaviyoSubmit(email, turnstileToken) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!resp.ok) console.warn('[Klaviyo proxy] serveur a répondu', resp.status);
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      console.warn('[Klaviyo] HTTP', resp.status, data);
+    } else if (data.demo) {
+      console.warn('[Klaviyo] MODE DEMO — variable KLAVIYO_API_KEY absente sur le serveur');
+    } else {
+      console.log('[Klaviyo] ok', data);
+    }
   } catch (err) {
-    console.warn('[Klaviyo proxy] erreur', err);
+    console.warn('[Klaviyo] erreur réseau', err);
   }
-  return true; // on ne bloque jamais l'utilisateur
+  return true;
 }
 
 /* Validation email simple */
