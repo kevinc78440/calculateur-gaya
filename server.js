@@ -83,10 +83,11 @@ app.post('/api/klaviyo', async (req, res) => {
         attributes: {
           properties: props || {},
           metric: { data: { type: 'metric', attributes: { name: metric || 'result' } } },
-          profile: { data: { type: 'profile', attributes: { email, ...(props || {}) } } }
+          profile: { data: { type: 'profile', attributes: { email } } }
         }
       }
     };
+    console.log('[Klaviyo] Event payload:', JSON.stringify(eventBody, null, 2));
     tasks.push(
       fetch('https://a.klaviyo.com/api/events/', {
         method: 'POST', headers, body: JSON.stringify(eventBody)
@@ -95,14 +96,16 @@ app.post('/api/klaviyo', async (req, res) => {
 
     const results = await Promise.allSettled(tasks);
 
-    // Log les erreurs API pour faciliter le debug
+    const errors = [];
     for (const r of results) {
       if (r.status === 'fulfilled' && !r.value.ok) {
         const body = await r.value.text().catch(() => '');
         console.error('[Klaviyo] Erreur API', r.value.status, body);
+        errors.push({ status: r.value.status, body });
       }
     }
 
+    if (errors.length) return res.json({ ok: false, errors });
     return res.json({ ok: true, results: results.map(r => r.status) });
   } catch (err) {
     console.error('[Klaviyo]', err);

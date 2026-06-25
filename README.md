@@ -111,6 +111,5 @@ TURNSTILE_SECRET_KEY=...        # Clé secrète Cloudflare Turnstile
 ## Publier
 - **Vercel** : `vercel deploy` ou connexion GitHub → déploiement automatique
 - **Netlify Drop** : glisser le dossier sur https://app.netlify.com/drop
-
 ---
 *Estimation indicative à titre informatif, sans valeur contractuelle.*
