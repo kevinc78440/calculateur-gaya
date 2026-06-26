@@ -587,9 +587,8 @@ async function onEmailSubmit() {
   const token = turnstileLoaded ? turnstile.getResponse() : '';
   console.log('[Turnstile]', { loaded: turnstileLoaded, widgetId: turnstileWidgetId, tokenOk: !!token });
 
-  if (!token) {
+  if (!token && turnstileWidgetId !== null) {
     console.warn('[Turnstile] Token vide — captcha non complété ou widget non rendu');
-    err.textContent = 'Veuillez compléter la vérification antispam.'; return;
   }
 
   err.textContent = '';
